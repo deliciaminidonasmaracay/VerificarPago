@@ -81,6 +81,11 @@
             transform: scale(0.98);
         }
 
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
         #mensaje {
             margin-top: 20px;
             text-align: center;
@@ -112,21 +117,21 @@
     </div>
 
     <div class="form-group">
-        <label>Banco Receptor (Tu cuenta):</label>
+        <label>Banco Receptor (Cuenta Destino):</label>
         <select id="bancoReceptor">
             <option value="Banesco-Principal">Mi Banesco</option>
-            <option value="Provincial">Mi Provincial</option>
+            <option value="Provincial-Principal">Mi Provincial</option>
             <option value="BDV-Principal">Mi Banco de Venezuela</option>
         </select>
     </div>
 
     <div class="form-group">
-        <label>Celular del Pago Móvil (Origen):</label>
+        <label>Celular del Pago (Origen):</label>
         <input type="tel" id="telefono" placeholder="Ej: 04121234567" required>
     </div>
 
     <div class="form-group">
-        <label>Número de Referencia (6-12 dígitos):</label>
+        <label>Referencia (6-12 dígitos):</label>
         <input type="number" id="referencia" placeholder="Ej: 12345678" required>
     </div>
 
@@ -142,7 +147,8 @@
 
 <script>
     function enviarPago() {
-        const urlScript = "https://script.google.com/macros/s/AKfycbwTLeFQlwTD3lZo-Oy-Mh23uuSbm5YbLqQd2Q0EekkErJItNDJeFl5ucRTY5We8Iofslw/exec"; // REEMPLAZA ESTO
+        // Asegúrate de que esta URL sea la de tu implementación más reciente
+        const urlScript = "https://script.google.com/macros/s/AKfycbwTLeFQlwTD3lZo-Oy-Mh23uuSbm5YbLqQd2Q0EekkErJItNDJeFl5ucRTY5We8Iofslw/exec";
         
         const ref = document.getElementById('referencia').value;
         const monto = document.getElementById('monto').value;
@@ -154,44 +160,44 @@
 
         if (!ref || !monto || !tel) {
             msgDiv.className = "error";
-            msgDiv.innerHTML = "❌ Por favor completa los datos (Teléfono, Referencia y Monto)";
+            msgDiv.innerHTML = "❌ Completa Teléfono, Referencia y Monto.";
             return;
         }
 
         msgDiv.className = "loading";
-        msgDiv.innerHTML = "⏳ Consultando con el banco...";
+        msgDiv.innerHTML = "⏳ Verificando con el banco...";
         btn.disabled = true;
 
+        // Formato de cadena que espera el script: ref,monto,emisor,receptor,tel
         const datosStr = `${ref},${monto},${emisor},${receptor},${tel}`;
 
-        // Usamos una URL con parámetros para evitar el bloqueo de CORS y obtener respuesta
-        fetch(`${urlScript}?callback=confirmar&referencia=${encodeURIComponent(datosStr)}`, {
-            method: 'GET', // Cambiamos a GET para usar JSONP o una respuesta directa legible
-            mode: 'cors'
+        // Petición limpia usando GET para evitar errores de CORS
+        fetch(`${urlScript}?referencia=${encodeURIComponent(datosStr)}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Error en red');
+            return response.json();
         })
-        .then(response => response.json())
         .then(data => {
             btn.disabled = false;
             if (data.resultado === "VERIFICADO") {
                 msgDiv.className = "success";
-                msgDiv.innerHTML = "✅ ¡PAGO VERIFICADO! Su pedido está en proceso. 🍓";
-                // Limpiar campos
+                msgDiv.innerHTML = "✅ ¡PAGO VERIFICADO! Pedido en proceso. 🍓";
+                // Limpiamos campos para evitar re-envíos
                 document.getElementById('referencia').value = "";
                 document.getElementById('monto').value = "";
-                document.getElementById('telefono').value = "";
             } else if (data.resultado === "MONTO_ERROR") {
                 msgDiv.className = "error";
-                msgDiv.innerHTML = "❌ EL MONTO NO COINCIDE. Verifique el monto reportado por su banco.";
+                msgDiv.innerHTML = "❌ MONTO INCORRECTO. Revise el monto exacto.";
             } else if (data.resultado === "NO_ENCONTRADO") {
                 msgDiv.className = "error";
-                msgDiv.innerHTML = "❌ REFERENCIA NO ENCONTRADA. Asegúrese de que el pago ya fue reportado por el banco.";
+                msgDiv.innerHTML = "❌ PAGO NO REGISTRADO. Espere un minuto y reintente.";
             }
         })
         .catch(error => {
             btn.disabled = false;
             msgDiv.className = "error";
-            msgDiv.innerHTML = "❌ Error de conexión con el servidor.";
-            console.error(error);
+            msgDiv.innerHTML = "❌ Error de conexión. Verifique su internet.";
+            console.error("Detalle:", error);
         });
     }
 </script>
