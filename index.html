@@ -146,60 +146,65 @@
 </div>
 
 <script>
-    function enviarPago() {
-        const urlScript = "https://script.google.com/macros/s/AKfycbwTLeFQlwTD3lZo-Oy-Mh23uuSbm5YbLqQd2Q0EekkErJItNDJeFl5ucRTY5We8Iofslw/exec";
+    async function enviarPago() {
+        // La URL de Google solo se usa ahora para notificar el número de teléfono al Excel
+        const urlScriptGoogle = "https://script.google.com/macros/s/AKfycbwTLeFQlwTD3lZo-Oy-Mh23uuSbm5YbLqQd2Q0EekkErJItNDJeFl5ucRTY5We8Iofslw/exec";
         
-        const ref = document.getElementById('referencia').value;
-        const monto = document.getElementById('monto').value;
-        const tel = document.getElementById('telefono').value;
-        const emisor = document.getElementById('bancoEmisor').value;
-        const receptor = document.getElementById('bancoReceptor').value;
+        const refInput = document.getElementById('referencia').value.trim();
+        const montoInput = document.getElementById('monto').value.trim();
+        const telInput = document.getElementById('telefono').value.trim();
         const msgDiv = document.getElementById('mensaje');
         const btn = document.getElementById('btnValidar');
 
-        if (!ref || !monto || !tel) {
+        if (!refInput || !montoInput || !telInput) {
             msgDiv.className = "error";
             msgDiv.innerHTML = "❌ Completa Teléfono, Referencia y Monto.";
             return;
         }
 
         msgDiv.className = "loading";
-        msgDiv.innerHTML = "⏳ Conectando con el servidor...";
+        msgDiv.innerHTML = "⏳ Verificando pago...";
         btn.disabled = true;
 
-        const datosStr = `${ref},${monto},${emisor},${receptor},${tel}`;
+        try {
+            // 1. LEER LA BASE DE DATOS LOCAL (pagos.json en GitHub)
+            // Agregamos un timestamp (?t=) para evitar que el navegador guarde una copia vieja
+            const response = await fetch('pagos.json?t=' + new Date().getTime());
+            if (!response.ok) throw new Error('No se pudo leer la base de datos');
+            
+            const pagos = await response.json();
 
-        // CAMBIO TÉCNICO: Agregados cors y redirect para evitar error de conexión
-        fetch(`${urlScript}?referencia=${encodeURIComponent(datosStr)}`, {
-            method: 'GET',
-            mode: 'cors',
-            redirect: 'follow'
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Network error');
-            return response.json();
-        })
-        .then(data => {
-            btn.disabled = false;
-            if (data.resultado === "VERIFICADO") {
+            // 2. BUSCAR EL PAGO
+            const pagoEncontrado = pagos.find(p => {
+                const refIgual = p.ref.toString().trim() === refInput;
+                // Comparamos montos normalizando puntos y comas
+                const montoHoja = parseFloat(p.monto.toString().replace(/\./g, '').replace(',', '.'));
+                const montoUser = parseFloat(montoInput.replace(/\./g, '').replace(',', '.'));
+                return refIgual && Math.abs(montoHoja - montoUser) < 0.01;
+            });
+
+            if (pagoEncontrado) {
                 msgDiv.className = "success";
                 msgDiv.innerHTML = "✅ ¡PAGO VERIFICADO! Pedido en proceso. 🍓";
+                
+                // 3. NOTIFICAR AL EXCEL (Opcional, para marcar como Verificado Web)
+                const datosNotificar = `${refInput},${montoInput},,,${telInput}`;
+                fetch(`${urlScriptGoogle}?referencia=${encodeURIComponent(datosNotificar)}`, { mode: 'no-cors' });
+
+                // Limpiar campos
                 document.getElementById('referencia').value = "";
                 document.getElementById('monto').value = "";
-            } else if (data.resultado === "MONTO_ERROR") {
+            } else {
                 msgDiv.className = "error";
-                msgDiv.innerHTML = "❌ MONTO INCORRECTO. Revise el monto exacto.";
-            } else if (data.resultado === "NO_ENCONTRADO") {
-                msgDiv.className = "error";
-                msgDiv.innerHTML = "❌ PAGO NO REGISTRADO. Reintente en un momento.";
+                msgDiv.innerHTML = "❌ PAGO NO ENCONTRADO. Reintente en un momento.";
             }
-        })
-        .catch(error => {
-            btn.disabled = false;
+        } catch (error) {
             msgDiv.className = "error";
-            msgDiv.innerHTML = "❌ Error de conexión. El servidor no respondió.";
+            msgDiv.innerHTML = "❌ Error técnico de conexión local.";
             console.error("Detalle:", error);
-        });
+        } finally {
+            btn.disabled = false;
+        }
     }
 </script>
 
