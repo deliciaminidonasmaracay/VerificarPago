@@ -68,5 +68,10 @@
     "ref": "4321",
     "monto": "3455",
     "estado": "Verificado Web"
+  },
+  {
+    "ref": "4321",
+    "monto": "",
+    "estado": ""
   }
 ]
