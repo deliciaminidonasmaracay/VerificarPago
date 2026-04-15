@@ -57,12 +57,12 @@
   {
     "ref": "123",
     "monto": "2333",
-    "estado": "Verificado Web"
+    "estado": "Confirmado"
   },
   {
     "ref": "1234",
     "monto": "3455",
-    "estado": ""
+    "estado": "Confirmado"
   },
   {
     "ref": "",
