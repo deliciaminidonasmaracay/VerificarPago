@@ -93,5 +93,10 @@
     "ref": "No encontrada",
     "monto": "0",
     "estado": "Confirmado"
+  },
+  {
+    "ref": "1432",
+    "monto": "",
+    "estado": ""
   }
 ]
