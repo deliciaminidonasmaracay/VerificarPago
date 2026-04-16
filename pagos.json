@@ -92,11 +92,11 @@
   {
     "ref": "No encontrada",
     "monto": "0",
-    "estado": "Confirmado"
+    "estado": ""
   },
   {
     "ref": "1432",
     "monto": "0",
-    "estado": ""
+    "estado": "Confirmado"
   }
 ]
