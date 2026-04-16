@@ -106,12 +106,12 @@
   },
   {
     "ref": "7500",
-    "monto": "",
+    "monto": "7500",
     "estado": "Confirmado"
   },
   {
     "ref": "No encontrada",
-    "monto": "7500",
+    "monto": "",
     "estado": "Confirmado"
   }
 ]
