@@ -78,5 +78,20 @@
     "ref": "432143",
     "monto": "3455",
     "estado": ""
+  },
+  {
+    "ref": "No encontrada",
+    "monto": "0",
+    "estado": "Confirmado"
+  },
+  {
+    "ref": "6789",
+    "monto": "750",
+    "estado": "Confirmado"
+  },
+  {
+    "ref": "No encontrada",
+    "monto": "0",
+    "estado": "Confirmado"
   }
 ]
