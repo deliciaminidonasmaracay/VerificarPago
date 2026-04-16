@@ -98,5 +98,20 @@
     "ref": "1432",
     "monto": "0",
     "estado": "Confirmado"
+  },
+  {
+    "ref": "No encontrada",
+    "monto": "0",
+    "estado": "Confirmado"
+  },
+  {
+    "ref": "7500",
+    "monto": "",
+    "estado": "Confirmado"
+  },
+  {
+    "ref": "No encontrada",
+    "monto": "7500",
+    "estado": "Confirmado"
   }
 ]
