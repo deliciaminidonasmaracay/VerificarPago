@@ -110,8 +110,13 @@
     "estado": "Confirmado"
   },
   {
-    "ref": "No encontrada",
+    "ref": "321",
     "monto": "7500",
+    "estado": "Confirmado"
+  },
+  {
+    "ref": "No encontrada",
+    "monto": "0",
     "estado": "Confirmado"
   }
 ]
